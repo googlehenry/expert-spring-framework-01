@@ -2,6 +2,10 @@ package org.example;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
 /**
  * 简单验证调用顺序.
  */
@@ -19,5 +23,17 @@ public class App {
         userService.businessMethod();
         orderService.businessMethod();
         dbService.businessMethod();
+
+        //jdk dynamic proxy demo
+        var original = new UserNormal();
+        var proxy = (UserInterface)Proxy.newProxyInstance(UserNormal.class.getClassLoader(), new UserNormal().getClass().getInterfaces(), new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                System.out.println("proxy enter...");
+                return method.invoke(original,args);
+            }
+        });
+
+        proxy.doSth();
     }
 }
